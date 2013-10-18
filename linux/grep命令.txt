@@ -1,0 +1,89 @@
+
+grep命令：搜索文件中的字符串
+一般情况下，grep用于对其他命令的输出结果进行过滤及查找特定字符串或匹配一定模式的字符串在文件中的位置。
+grep(global search regular expression and print out the line)，是一种强大的文本搜索工具，它能用表达式搜索文件，并把匹配的结果打印出来。
+
+命令：
+grep [选项] [字符串或正则表达式] [文件名...]
+
+正则表达式就是用特殊的语法进行字符串匹配的字符串格式，如果一个字符串可以用某个正则表达式来描述，就说这个字符和正则表达式匹配，这和dos中的*代表任意字符类似。
+
+正则表达式中常用元字符集描述
+^: 一行的开始标志，如：^good 匹配所有以good开头的行。
+$: 一行的结束标志，如：good$ 匹配所有以good结尾的行。
+?或.：匹配任意一个非换行字符，如：good?abc,匹配good后接一个任意字符，然后是abc的行。
+
+*:匹配任意零个或多个字符
+
+[xxx]或[x-x]:匹配字符集或某个范围内的一个字符，如：seq[01],匹配一行中所有seq0或seq1，可以罗列非连续字符[afgi]，也可以罗列连续字符[a-g].
+
+[^]:匹配一个不在指定范围的字符，如：seq[^01]，匹配不包含seq0,seq1的行。
+
+\(..)\:标记匹配字符，如：\(abc\)，所有匹配的行中的abc被标记为1 
+
+\<: 单词的开始标志，如：\<big 匹配包含以big开头的单词的行
+\>: 单词的结束标志，如：end\> 匹配包含以end结尾的单词的行
+
+x\{m\}:重复x字符m次
+x\{m,\}: 重复x字符至少m次。
+x\{m,n\}:重复x字符到少m次，但又不多于n次。
+
+\w:匹配文字和数字字符，即[A-Za-z0-9]
+\W:匹配非文字和数字字符的字符。
+\b\:单词锁定符，如：\babc\ 只匹配abc
+正则表达式中有空格则要加上“号。
+
+-c  输出匹配行的个数
+-I  不区分大小写
+-h  查询多个文件时不显示文件名。
+-v  显示不包含匹配文件的所有行。
+-n  显示匹配行及行号
+-i  忽略大小写差别
+
+
+例：
+1、grep 过滤ls -l显示的内容
+ls -l | grep ^d  只显示当前目录下的目录文件
+ls -l | grep ^[^d] 只显示当前目录下的文件 
+ls -l | grep 2011-01-22  显示具有2011-01-22这个时间属性的文件 
+
+
+2、进程信息,显示pps软件的进程信息
+linux@ubuntu:~/Ubuntu One/music$ ps -e | grep -i pps
+ 2497 ?        00:00:51 PPStream
+ 2516 ?        00:04:16 PPSDaemon
+
+
+3、查看关于linux用户和组的信息
+linux@ubuntu:~$ grep -n linux /etc/passwd /etc/group
+/etc/passwd:33:linux:x:1000:1000:linux,,,:/home/linux:/bin/bash
+/etc/group:5:adm:x:4:linux
+/etc/group:15:dialout:x:20:linux
+/etc/group:18:cdrom:x:24:linux
+/etc/group:35:plugdev:x:46:linux
+/etc/group:50:lpadmin:x:111:linux
+/etc/group:58:admin:x:119:linux
+/etc/group:61:linux:x:1000:
+/etc/group:62:sambashare:x:122:linux
+
+4、查找特定的字符串
+linux@ubuntu:~$ grep -n "f("  a.c
+5:printf("euw th:");
+6:scanf("%d",&n);
+11:printf("%d\n",s);
+14:printf("s=%d\n",s);
+注意有些字符要用”“扩起来。
+
+5、查询以Do开头的
+linux@ubuntu:~$ ls  | grep ^Do
+Documents
+Downloads
+
+6、查询以s结尾的
+linux@ubuntu:~$ ls | grep s$
+Documents
+Downloads
+Pictures
+Templates
+Videos
+VirtualBox VMs
