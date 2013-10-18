@@ -1,0 +1,147 @@
+
+1.	查看磁盘空间，CPU等信息，以及内存使用情况
+1)$ df -h
+2)$ du --max-depth=1 -h
+3)$ free
+4)$ cat /proc/cpuinfo
+5)$ lsb_release -a
+
+2.	文件夹及文件统计及移动：
+2.1.	文件夹创建及删除
+创建文件夹：Mkdir 2012
+移动当前文件Mv   bax*2012.txt 2012
+删除当前文件夹下的文件：rm -rf *.* 或 rm –rfd *
+2.2.	文件夹个数及统计
+统计当前文件夹下文件的个数
+ls -l . |grep "^-"|wc -l
+
+统计当前某文件夹下目录的个数
+ls -l . |grep "^ｄ"|wc -l
+
+统计文件夹下文件的个数，包括子文件夹里的
+ls -lR|grep "^-"|wc -l
+
+如统计/home/han目录(包含子目录)下的所有js文件则：
+ls -lR /home/han|grep js|wc -l 或 ls -l "/home/han"|grep "js"|wc -l
+
+统计文件夹下目录的个数，包括子文件夹里的
+ls -lR|grep "^d"|wc –l
+查看文件夹下包含文件名PDF的文件总数
+ls -l . |grep "pdf"|wc -l
+说明：
+ls -lR
+长列表输出该目录下文件信息(R代表子目录注意这里的文件，不同于一般的文件，可能是目录、链接、设备文件等)
+
+grep "^-"
+这里将长列表输出信息过滤一部分，只保留一般文件，如果只保留目录就是 ^d
+
+wc -l
+统计输出信息的行数，因为已经过滤得只剩一般文件了，所以统计结果就是一般文件信息的行数，又由于一行信息对应一个文件，所以也就是文件的个数。
+
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+如果只查看文件夹
+ls -d 只能显示一个.
+find -type d 可以看到子文件夹
+ls -lF |grep / 或 ls -l |grep '^d' 只看当前目录下的文件夹，不包括往下的文件夹
+$ find . -name 'my*' 搜索当前目录（含子目录，以下同）中，所有文件名以my开头的文件。
+$ find . -name 'my*' -ls搜索当前目录中，所有文件名以my开头的文件，并显示它们的详细信息。
+$ find . -type f -mmin -10搜索当前目录中，所有过去10分钟中更新过的普通文件。如果不加-type f参数，则搜索普通文件+特殊文件+目录。
+查看前10个文件
+ls -1 | sort -u | head -10
+ls –lt | head -10
+2.3.	查看文件夹大小
+du -sh * 或直接 du –sh
+
+2.4.	远程电脑之间相互传文件
+从B上得A服务器上的文件：
+scp root@10.215.20.168:/home/ebizuser/app/appletrax/upload/myfile.zip /opt/jboss
+或从A放文件到B服务器上
+scp /home/ebizuser/app/appletrax/upload/myfile.zip root@10.215.22.97:/opt/jboss
+
+2.5.	Linux 删除指定时间前的文件
+ 
+
+1.创建一个基准时间文件
+//比如创建一个“创建时间”为2010年01月01日00时00分的文件-- time_file
+//时间格式为 [[CC]YY]MMDDhhmm[.ss]
+# touch -t 201001010000 time_file
+
+2.证实一下
+# ll --time-style=long-iso time_file
+-rw-rw-r-- 1 work work 0 2010-01-01 00:00 time_file
+
+3.	找到并删除基准时间前的文件
+find . ! -newer time_file -exec mv {} /opt/jboss/sharefolder_prod/ciscodts/data/outbound/err/30673/bk \;
+# find . ! -newer time_file | xargs rm
+压缩它或拷备
+xargs tar -cvzf images.tar.gz 或xargs -i cp {}  /home/
+
+
+4.删除基准文件
+# rm -rf time_file
+
+注：如果是要根据修改时间，则把newer改成cnewer，如果是根据访问时间，则把newer改为anewer
+4.	创建用户，修改所有者和组，做LINK
+4.1.	添加用户的命令
+-d是指定目录 -g是GROUP已有的话，直接指定，否则不要加“-g pumaprod” 最后一个是新的用户名
+useradd -d /home/pumaprod -g pumaprod pumaprod
+useradd -d /opt/jboss jbossuser
+useradd -d /opt/jboss –g jbossuser jbosstest 
+useradd -d /opt/jboss –g jbossuser jbossuat
+
+4.2.	设置密码及修改文件夹权限
+passwd 用户名
+修改文件夹的所有者,最好切换至上一层目录中，对应的是"用户组.所有者 文件夹"
+chown pumaprod.pumaprod pumaprod
+chown jbossuser. jbossuser jboss
+chmod 775 -R domainprod
+4.3.	做link链接,前一个是来源，后一个是目标
+ln -s /opt/pumaprod/data /home/pumaprod/data
+
+
+5.	Linux 查看进程和删除进程
+5.1.	利用PS命令
+1. 在 LINUX 命令平台输入 1-2 个字符后按 Tab 键会自动补全后面的部分(前提是要有这个东西，例如在装了 tomcat 的前提下, 输入 tomcat 的 to 按 tab)。
+2. ps 命令用于查看当前正在运行的进程。
+grep 是搜索
+例如： ps -ef | grep java   或  ps -ef | grep squid
+表示查看所有进程里 CMD 是 java 的进程信息
+ps -aux | grep java
+-aux 显示所有状态
+ps
+3. kill 命令用于终止进程
+例如： kill -9 [PID]
+-9 表示强迫进程立即停止
+通常用 ps 查看进程 PID ，用 kill 命令终止进程
+
+5.2.	利用TOP
+查出当前系统所有进程或针对用户，并可以通过此方法进行性能监控
+Top –u/-n  或用--help
+6.	文件压缩及解压
+6.1.	ZIP压缩作用
+zip -r myfile.zip ./*
+将当前目录下的所有文件和文件夹全部压缩成myfile.zip文件,－r表示递归压缩子目录下所有文件.
+unzip -o -d /home/sunny myfile.zip
+把myfile.zip文件解压到 /home/sunny/
+-o:不提示的情况下覆盖文件；
+-d:-d /home/sunny 指明将文件解压缩到/home/sunny目录下；
+==============
+6.2.	其它压缩
+tar –cvf jpg.tar *.jpg //将目录里所有jpg文件打包成tar.jpg
+tar –czf jpg.tar.gz *.jpg //将目录里所有jpg文件打包成jpg.tar后，并且将其用gzip压缩，生成一个gzip压缩过的包，命名为jpg.tar.gz
+tar –cjf jpg.tar.bz2 *.jpg //将目录里所有jpg文件打包成jpg.tar后，并且将其用bzip2压缩，生成一个bzip2压缩过的包，命名为jpg.tar.bz2
+tar –cZf jpg.tar.Z *.jpg //将目录里所有jpg文件打包成jpg.tar后，并且将其用compress压缩，生成一个umcompress压缩过的包，命名为jpg.tar.Z
+rar a jpg.rar *.jpg //rar格式的压缩，需要先下载rar for linux
+zip jpg.zip *.jpg //zip格式的压缩，需要先下载zip for linux
+6.3.	其它解压
+tar –xvf file.tar //解压 tar包
+tar -xzvf file.tar.gz //解压tar.gz
+tar -xjvf file.tar.bz2 //解压 tar.bz2
+tar –xZvf file.tar.Z //解压tar.Z
+unrar e file.rar //解压rar
+unzip file.zip //解压zip
+7.	待定
+
+8.	待定
+
+
